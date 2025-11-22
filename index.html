@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="AI Instagram Hashtag Generator Tool - Generate perfect hashtags using AI for Instagram, Reels, TikTok, and social media." />
+    <meta name="keywords" content="AI Hashtag Generator, Instagram Hashtags, Reels Hashtags, Social Media Tool" />
+    <meta name="author" content="Your Name" />
+    <link rel="canonical" href="/" />
+
+    <title>AI Instagram Hashtag Generator</title>
+
+    <!-- SEO Open Graph -->
+    <meta property="og:title" content="AI Instagram Hashtag Generator" />
+    <meta property="og:description" content="Generate perfect hashtags using AI for Instagram & social media." />
+    <meta property="og:type" content="website" />
+
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --accent: #000;
+            --muted: #6b7280;
+            --success: #16a34a;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: var(--bg);
+            color: #111827;
+            -webkit-font-smoothing:antialiased;
+        }
+        header {
+            background: var(--accent);
+            padding: 20px;
+            text-align: center;
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .container {
+            max-width: 760px;
+            margin: 28px auto;
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(8,8,8,0.08);
+        }
+        label { display:block; margin-bottom:8px; font-weight:600; }
+        textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            resize: vertical;
+        }
+        .controls {
+            display:flex;
+            gap:10px;
+            margin-top:10px;
+            flex-wrap:wrap;
+        }
+        button {
+            padding: 10px 14px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight:600;
+        }
+        button.ghost {
+            background: transparent;
+            border: 1px solid #e5e7eb;
+            color: #111827;
+        }
+        .output {
+            background: #f8fafc;
+            padding: 14px;
+            border-radius: 10px;
+            margin-top: 18px;
+            font-size: 15px;
+            min-height: 64px;
+        }
+        .set {
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+            margin-top:10px;
+            flex-wrap:wrap;
+        }
+        .set .tags {
+            flex: 1 1 100%;
+            padding:10px;
+            background:#fff;
+            border-radius:8px;
+            border:1px solid #e6e7eb;
+            word-break:break-word;
+        }
+        .set-actions { display:flex; gap:8px; align-items:center; }
+        .ad-box {
+            width: 100%;
+            height: 120px;
+            background: #e9ecef;
+            margin: 18px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed #c7c7c7;
+            font-size: 15px;
+            border-radius:8px;
+        }
+        .meta { color: var(--muted); font-size:13px; margin-top:8px; }
+        .success { color: var(--success); font-weight:700; }
+        @media (min-width:600px) {
+            .set { align-items:center; }
+            .set .tags { flex: 1; }
+            .set-actions { flex: 0 0 auto; }
+        }
+    </style>
+</head>
+<body>
+
+<header>AI Instagram Hashtag Generator</header>
+
+<main class="container" role="main" aria-labelledby="page-title">
+    <h1 id="page-title" style="font-size:18px;margin:0 0 12px 0">Generate hashtags & short viral captions</h1>
+
+    <!-- TOP GOOGLE AD SPACE -->
+    <div class="ad-box" role="complementary" aria-label="Top advertisement">Google Ad (Paste AdSense code here)</div>
+
+    <form id="hashtagForm" onsubmit="return false;" novalidate>
+        <label for="inputText">Enter Caption / Topic</label>
+        <textarea id="inputText" name="inputText" placeholder="Write your caption, topic or niche..." aria-describedby="inputHelp"></textarea>
+        <div id="inputHelp" class="meta">Tip: keep it short and descriptive — e.g. "beach sunset travel vlog".</div>
+
+        <div class="controls" style="margin-top:12px;">
+            <button type="button" id="generateBtn">Generate Hashtags</button>
+            <button type="button" id="copyAllBtn" class="ghost" disabled>Copy all hashtags</button>
+            <button type="button" id="clearBtn" class="ghost">Clear</button>
+        </div>
+    </form>
+
+    <div class="output" id="outputBox" aria-live="polite">Generated hashtags and captions will appear here...</div>
+
+    <div class="meta" style="margin-top:8px;">
+        Note: Instagram allows up to 30 hashtags per post. This tool suggests short/medium/long groups — use responsibly.
+    </div>
+
+    <!-- BOTTOM GOOGLE AD SPACE -->
+    <div class="ad-box" role="complementary" aria-label="Bottom advertisement">Google Ad (Paste AdSense code here)</div>
+</main>
+
+<script>
+(function(){
+    // Helper to escape HTML to avoid XSS when injecting user-derived text into innerHTML
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function shuffleArray(arr) {
+        // Fisher-Yates
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // base extras (kept generic). Consider replacing these with analytics-backed tags later.
+    const extras = [
+        "trending","viral","reels","reelitfeelit","instadaily","dailyupdate",
+        "explorepage","fyp","viralvideo","instagram","instagrowth","socialmedia",
+        "boost","creator","contentcreator","influencer","photooftheday","love",
+        "style","ootd","foodie","travel","fitness","art","music","fun",
+        "igers","picoftheday","followforfollow","like4like","creative","motivation",
+        "lifestyle","beauty","nature","tech","gadgets","business","startup","learning"
+    ];
+
+    const captions = [
+        "🔥 ये तो पोस्ट करने लायक है!",
+        "✨ बस vibe ही vibe!",
+        "💯 Mood ON, worries gone!",
+        "😎 स्टाइल ऐसा जो सबको याद रहे!",
+        "📸 Moment captured perfectly!",
+        "💥 आज कुछ धमाका होने वाला है!",
+        "❤️ Feel it, live it.",
+        "⚡ Energy overloaded!",
+        "🌟 Shine mode activated!",
+        "Caption के साथ story भी शेयर करो!",
+        "New post, who dis? 😜",
+        "Catch flights, not feelings.",
+        "Smiles are free, spread them.",
+        "Creating memories, one frame at a time."
+    ];
+
+    const generateBtn = document.getElementById('generateBtn');
+    const copyAllBtn = document.getElementById('copyAllBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const inputText = document.getElementById('inputText');
+    const outputBox = document.getElementById('outputBox');
+
+    function extractKeywords(text) {
+        const words = text.toLowerCase().split(/\s+/);
+        const clean = [];
+        for (let w of words) {
+            // keep alphanumerics and basic unicode letters/digits
+            let k = w.replace(/[^a-z0-9\u00C0-\u024F\u1E00-\u1EFF]/gi, "");
+            if (k.length > 0) clean.push(k);
+        }
+        // remove duplicates preserving order
+        return [...new Set(clean)];
+    }
+
+    function buildHashtags(keywords, extrasPool, maxTotal) {
+        const baseTags = keywords.map(k => "#" + k);
+        const remaining = Math.max(0, maxTotal - baseTags.length);
+
+        // shuffle extras and pick unique extras not already in baseTags
+        const filteredExtras = extrasPool.filter(e => !baseTags.includes("#" + e));
+        const chosen = shuffleArray(filteredExtras.slice()).slice(0, remaining).map(e => "#" + e);
+
+        const all = baseTags.concat(chosen);
+        return all.slice(0, maxTotal);
+    }
+
+    function pickRandomCaption() {
+        return captions[Math.floor(Math.random() * captions.length)];
+    }
+
+    function renderSets(allTags) {
+        // Create Short/Medium/Long (10/15/30) but capped by actual tags length
+        const short = allTags.slice(0, Math.min(10, allTags.length));
+        const medium = allTags.slice(0, Math.min(15, allTags.length));
+        const long = allTags.slice(0, Math.min(30, allTags.length)); // Instagram max 30
+
+        // build HTML - use escaped text where needed
+        const caption = pickRandomCaption();
+        let html = '';
+        html += '<div><strong>🔥 Viral Caption:</strong><br><div style="margin-top:6px;padding:8px;background:#fff;border-radius:6px;border:1px solid #e6e7eb">' + escapeHtml(caption) + '</div></div>';
+
+        function tagsHtml(arr) {
+            return arr.map(t => escapeHtml(t)).join(' ');
+        }
+
+        html += '<div style="margin-top:12px"><strong>📌 Suggested Hashtag Sets:</strong></div>';
+
+        // Short
+        html += '<div class="set" style="margin-top:8px">';
+        html += '<div class="tags" id="shortTags"><strong>Short (up to 10)</strong><div style="margin-top:6px">' + tagsHtml(short) + '</div><div class="meta" style="margin-top:6px">' + short.length + ' tags</div></div>';
+        html += '<div class="set-actions"><button type="button" data-copy="short">Copy</button></div>';
+        html += '</div>';
+
+        // Medium
+        html += '<div class="set">';
+        html += '<div class="tags" id="mediumTags"><strong>Medium (up to 15)</strong><div style="margin-top:6px">' + tagsHtml(medium) + '</div><div class="meta" style="margin-top:6px">' + medium.length + ' tags</div></div>';
+        html += '<div class="set-actions"><button type="button" data-copy="medium">Copy</button></div>';
+        html += '</div>';
+
+        // Long
+        html += '<div class="set">';
+        html += '<div class="tags" id="longTags"><strong>Long (up to 30)</strong><div style="margin-top:6px">' + tagsHtml(long) + '</div><div class="meta" style="margin-top:6px">' + long.length + ' tags</div></div>';
+        html += '<div class="set-actions"><button type="button" data-copy="long">Copy</button></div>';
+        html += '</div>';
+
+        html += '<div style="margin-top:12px"><strong>✅ Tip:</strong> Use the Short set for better engagement; use the Long set to maximize reach. Copy any set and paste it in your post.</div>';
+
+        outputBox.innerHTML = html;
+
+        // enable copy-all if any tags exist
+        copyAllBtn.disabled = allTags.length === 0;
+
+        // attach copy handlers for the newly added buttons
+        const buttons = outputBox.querySelectorAll('button[data-copy]');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                let id = this.getAttribute('data-copy');
+                let target;
+                if (id === 'short') target = outputBox.querySelector('#shortTags div');
+                if (id === 'medium') target = outputBox.querySelector('#mediumTags div');
+                if (id === 'long') target = outputBox.querySelector('#longTags div');
+                if (!target) return;
+                const text = target.textContent.trim();
+                copyTextToClipboard(text, this);
+            });
+        });
+    }
+
+    function copyTextToClipboard(text, btn) {
+        if (!navigator.clipboard) {
+            // fallback
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showCopyFeedback(btn);
+            } finally {
+                document.body.removeChild(ta);
+            }
+            return;
+        }
+        navigator.clipboard.writeText(text).then(function(){
+            showCopyFeedback(btn);
+        }).catch(function(){
+            // ignore
+        });
+    }
+
+    function showCopyFeedback(btn) {
+        const original = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        btn.disabled = true;
+        setTimeout(() => {
+            btn.textContent = original;
+            btn.disabled = false;
+        }, 1500);
+    }
+
+    generateBtn.addEventListener('click', function(){
+        const text = inputText.value || '';
+        if (text.trim().length === 0) {
+            outputBox.innerHTML = '<div style="color:#b91c1c">Please enter some text first!</div>';
+            copyAllBtn.disabled = true;
+            return;
+        }
+        outputBox.innerHTML = 'Generating...';
+
+        // Extract keywords
+        const keywords = extractKeywords(text);
+        // Build hashtags up to 30 tags total (Instagram limit)
+        const allTags = buildHashtags(keywords, extras, 30);
+
+        renderSets(allTags);
+    });
+
+    copyAllBtn.addEventListener('click', function(){
+        // gather all tags displayed
+        const shortDiv = outputBox.querySelector('#shortTags div');
+        const mediumDiv = outputBox.querySelector('#mediumTags div');
+        const longDiv = outputBox.querySelector('#longTags div');
+        const longText = longDiv ? longDiv.textContent.trim() : '';
+        if (!longText) return;
+        copyTextToClipboard(longText, copyAllBtn);
+    });
+
+    clearBtn.addEventListener('click', function(){
+        inputText.value = '';
+        outputBox.innerHTML = 'Generated hashtags and captions will appear here...';
+        copyAllBtn.disabled = true;
+        inputText.focus();
+    });
+
+    // keyboard shortcut: Ctrl+Enter to generate
+    inputText.addEventListener('keydown', function(e){
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            generateBtn.click();
+        }
+    });
+
+})();
+</script>
+
+<!-- SAMPLE GOOGLE ADSENSE CODE (Replace with your unit ID)
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=YOUR-AD-UNIT-ID" crossorigin="anonymous"></script>
+-->
+
+</body>
+</html>
